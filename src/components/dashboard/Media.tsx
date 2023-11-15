@@ -1,4 +1,18 @@
+import { FileUploader } from "react-drag-drop-files";
+import { useDispatch } from "react-redux";
+import { setVideoSource } from "../home/videoSetupSlice";
+
+const fileTypes: any = ["mp4"];
+
 function Media() {
+  const dispatch = useDispatch();
+
+  function handleVideoUpload(file: File) {
+    const videoUrl = URL.createObjectURL(file);
+    
+    dispatch(setVideoSource(videoUrl));
+  }
+
   return (
     <div className="tabs-custom2">
       <div className="tab-content" id="v-tabs-tabContent">
@@ -15,13 +29,21 @@ function Media() {
                 <i className="fa-solid fa-xmark"></i>
               </a>
             </div>
-            <a
-              href="javascript:void(0)"
-              className="addmedia mt-2 mb-2 d-flex flex-column align-items-center justify-content-center g-1"
+
+            <FileUploader
+              handleChange={handleVideoUpload}
+              name="file"
+              types={fileTypes}
+              classes="w-100"
             >
-              <i className="fa-solid fa-cloud-arrow-up"></i>
-              Upload Media
-            </a>
+              <a
+                href="javascript:void(0)"
+                className="addmedia mt-2 mb-2 d-flex flex-column align-items-center justify-content-center g-1"
+              >
+                <i className="fa-solid fa-cloud-arrow-up"></i>
+                Upload Media
+              </a>
+            </FileUploader>
           </div>
           <div
             className="nav tabs-cust d-flex justify-content-center"
@@ -132,6 +154,7 @@ function Media() {
             <img src="/assets/images/layout.jpg" alt="" />
           </div>
         </div>
+        D
       </div>
     </div>
   );

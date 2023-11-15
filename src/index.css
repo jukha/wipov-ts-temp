@@ -1425,7 +1425,8 @@ select.layout .rectangle {
   align-items: center;
   margin-top: 30px;
 }
-.media-screen img {
+.media-screen img,
+.media-screen video {
   max-width: 80%;
   margin: 0 auto;
 }
@@ -1623,3 +1624,71 @@ select.layout .rectangle {
 }
 /*Dashboard*/
   
+
+/* Video player custom progress bar */
+/*********** Baseline, reset styles ***********/
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  /* width: 25rem; */
+  /* width: 100%; */
+}
+
+/* Removes default focus */
+input[type="range"]:focus {
+  outline: none;
+}
+
+/******** Chrome, Safari, Opera and Edge Chromium styles ********/
+/* slider track */
+input[type="range"]::-webkit-slider-runnable-track {
+  background-color: #5f4272;
+  border-radius: 0.5rem;
+  /* height: 1rem; */
+  height: 10px;
+}
+
+/* slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -4px; /* Centers thumb on the track */
+  background-color: #000;
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  outline: 3px solid #000;
+  outline-offset: 0.125rem;
+}
+
+/*********** Firefox styles ***********/
+/* slider track */
+input[type="range"]::-moz-range-track {
+  background-color: #5f4272;
+  border-radius: 0.5rem;
+  /* height: 1rem; */
+  height: 10px;
+}
+
+/* slider thumb */
+input[type="range"]::-moz-range-thumb {
+  background-color: #000;
+  border: none; /*Removes extra border that FF applies*/
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+}
+
+input[type="range"]:focus::-moz-range-thumb{
+  outline: 3px solid #000;
+  outline-offset: 0.125rem;
+}
+
+.custom-progress-bar {
+  border-radius: inherit;
+}

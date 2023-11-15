@@ -18,7 +18,7 @@ function App() {
           <Route path="/" index element={<Home />} />
           <Route path="/preview" element={<Preview />} />
           <Route path="/dashboard" element={<Dashboard />}>
-            <Route index element={<Navigate replace to="text" />} />
+            <Route index element={<Navigate replace to="media" />} />
             <Route path="text" element={<Text />} />
             <Route path="media" element={<Media />} />
             <Route path="template" element={<Template />} />

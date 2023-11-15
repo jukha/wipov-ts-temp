@@ -1,10 +1,22 @@
 import { useLocation } from "react-router-dom";
 import BlockLayers from "./BlockLayers";
 import VideoTimeline from "./VideoTimeline";
+import { useSelector } from "react-redux";
+import { selectVideoSource } from "../../home/videoSetupSlice";
+import { useEffect, useRef, useState } from "react";
+import { formatTime } from "../../../utils/formatTime";
 
 function Project() {
+  // Video
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
   const location = useLocation();
   const { pathname } = location;
+
+  const videoSrc = useSelector(selectVideoSource);
 
   const isTextOrThumbnail =
     pathname.endsWith("/text") || pathname.endsWith("/thumbnail");
@@ -16,6 +28,67 @@ function Project() {
   // Check if the URL ends with /template or /audio
   const isTemplateOrAudio =
     pathname.endsWith("/template") || pathname.endsWith("/audio");
+
+  function togglePlayPause() {
+    const videoEl = videoRef.current;
+    if (videoEl) {
+      if (videoEl.paused) {
+        videoEl.play();
+      } else {
+        videoEl.pause();
+      }
+      setIsPlaying((state) => !state);
+    }
+  }
+
+  function handleProgressChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const videoElement = videoRef.current;
+
+    if (videoElement) {
+      const newTime = parseFloat(e.target.value);
+      videoElement.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  }
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+
+    if (videoElement) {
+      const handleTimeUpdate = () => {
+        setCurrentTime(videoElement.currentTime);
+      };
+
+      const handleDurationChange = () => {
+        setDuration(videoElement.duration);
+      };
+
+      videoElement.addEventListener("timeupdate", handleTimeUpdate);
+      videoElement.addEventListener("durationchange", handleDurationChange);
+
+      return () => {
+        videoElement.removeEventListener("timeupdate", handleTimeUpdate);
+        videoElement.removeEventListener(
+          "durationchange",
+          handleDurationChange
+        );
+      };
+    }
+  }, [videoSrc]);
+
+  const passedTimeStyle = {
+    width: `${(currentTime / duration) * 100}%`,
+    height: "10px",
+    background: "#5f4272", // Purple color for passed time
+    borderRadius: "inherit"
+  };
+  
+  const remainingTimeStyle = {
+    width: `${((duration - currentTime) / duration) * 100}%`,
+    height: "10px",
+    background: "#ecf0f1", // Gray color for remaining time
+    borderRadius: "inherit"
+  };
 
   return (
     <div className="main-div">
@@ -113,16 +186,42 @@ function Project() {
             <i className="fa-solid fa-trash"></i>
           </a>
         </div>
-        <img className="w-100" src="/assets/images/screen.png" alt="" />
+        {/* <img className="w-100" src="/assets/images/screen.png" alt="" /> */}
+        <video ref={videoRef} className="w-100">
+          {videoSrc && <source src={videoSrc} type="video/mp4" />}
+        </video>
       </div>
       <div className="duration-track">
-        <i className="fa-solid fa-play"></i>
-        <div className="line">
-          <div className="dark"></div>
+        <button
+          className="border-0"
+          style={{ minWidth: "28px" }}
+          onClick={togglePlayPause}
+        >
+          {isPlaying ? (
+            <i className="fa-solid fa-pause"></i>
+          ) : (
+            <i className="fa-solid fa-play"></i>
+          )}
+        </button>
+        <div className="line d-flex">
+          {/* <div className="dark"></div> */}
+          <div className="custom-progress-bar w-100">
+          <div className="passed-time" style={passedTimeStyle} />
+          <div className="remaining-time" style={remainingTimeStyle} />
+        </div>
+          {/* <input
+            className="w-100"
+            type="range"
+            min={0}
+            max={duration}
+            value={currentTime}
+            onChange={handleProgressChange}
+          /> */}
         </div>
         <i className="ms-1 bx bxs-volume-low"></i>
         <i className="ms-1 bx bx-layout"></i>
-        <a href="javascript:void(0)">00:15:32/03:00:00</a>
+        <span>{`${formatTime(currentTime)} / ${formatTime(duration)}`}</span>
+        {/* <a href="javascript:void(0)">00:15:32/03:00:00</a> */}
       </div>
       <div className="timeline-div">
         {isTextOrThumbnail && <BlockLayers />}

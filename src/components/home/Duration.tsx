@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { formatTime } from "../../utils/formatTime";
+import { formatDuration as formatTime } from "../../utils/formatTime";
 import { selectDuration, setDuration } from "./videoSetupSlice";
 import { useState, useRef } from "react";
 
@@ -21,7 +21,6 @@ function Duration() {
     dispatch(setDuration(duration));
   }
 
-  
   return (
     <div className="card-custom">
       <p className="text-center">
