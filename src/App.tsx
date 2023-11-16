@@ -10,11 +10,18 @@ import Audio from "./components/dashboard/Audio";
 import Logo from "./components/dashboard/Logo";
 import Thumbnail from "./components/dashboard/Thumbnail";
 
+
+import "primereact/resources/themes/vela-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import Test from "./components/ffmpeg-test/Test";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AppLayout />}>
+        <Route path="/" element={<Test />} />
+        {/* <Route element={<AppLayout />}>
           <Route path="/" index element={<Home />} />
           <Route path="/preview" element={<Preview />} />
           <Route path="/dashboard" element={<Dashboard />}>
@@ -26,7 +33,7 @@ function App() {
             <Route path="logo" element={<Logo />} />
             <Route path="thumbnail" element={<Thumbnail />} />
           </Route>
-        </Route>
+        </Route> */}
       </Routes>
     </BrowserRouter>
   );

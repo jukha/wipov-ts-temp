@@ -1,10 +1,15 @@
 import { useLocation } from "react-router-dom";
 import BlockLayers from "./BlockLayers";
 import VideoTimeline from "./VideoTimeline";
-import { useSelector } from "react-redux";
-import { selectVideoSource } from "../../home/videoSetupSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectFormat,
+  selectVideoSource,
+  setFormat,
+} from "../../home/videoSetupSlice";
 import { useEffect, useRef, useState } from "react";
 import { formatTime } from "../../../utils/formatTime";
+import { Slider, SliderChangeEvent } from "primereact/slider";
 
 function Project() {
   // Video
@@ -12,11 +17,15 @@ function Project() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+
+  const dispatch = useDispatch();
+  const format = useSelector(selectFormat);
+  const videoSrc = useSelector(selectVideoSource);
 
   const location = useLocation();
   const { pathname } = location;
-
-  const videoSrc = useSelector(selectVideoSource);
 
   const isTextOrThumbnail =
     pathname.endsWith("/text") || pathname.endsWith("/thumbnail");
@@ -29,6 +38,50 @@ function Project() {
   const isTemplateOrAudio =
     pathname.endsWith("/template") || pathname.endsWith("/audio");
 
+  // function getAspectRatioStyles() {
+  //   let aspectRatioStyles: React.CSSProperties = {};
+
+  //   switch (format) {
+  //     case "16:9":
+  //       aspectRatioStyles = { width: "100%", height: "56.25%" }; // 16:9 aspect ratio
+  //       break;
+  //     case "9:16":
+  //       aspectRatioStyles = { width: "56.25%", height: "100%" }; // 9:16 aspect ratio
+  //       break;
+  //     case "1:1":
+  //       aspectRatioStyles = { width: "100%", height: "100%" }; // 1:1 aspect ratio
+  //       break;
+  //     default:
+  //       break;
+  //   }
+
+  //   return aspectRatioStyles;
+  // }
+
+  function handleVideoClick() {
+    const videoEl = videoRef.current;
+    if (videoEl) {
+      if (videoEl.paused) {
+        videoEl.play();
+      } else {
+        videoEl.pause();
+      }
+      setIsPlaying((state) => !state);
+    }
+  }
+
+  function toggleVolumeSlider() {
+    setShowVolumeSlider((prev) => !prev);
+  }
+  function handleVolumeChange(e: SliderChangeEvent) {
+    const newVolume = Number(e.value) / 100;
+    setVolume(newVolume);
+
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.volume = newVolume;
+    }
+  }
   function togglePlayPause() {
     const videoEl = videoRef.current;
     if (videoEl) {
@@ -41,13 +94,31 @@ function Project() {
     }
   }
 
-  function handleProgressChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleProgressChange(e: SliderChangeEvent) {
     const videoElement = videoRef.current;
 
     if (videoElement) {
-      const newTime = parseFloat(e.target.value);
+      const newTime = Number(e.value);
       videoElement.currentTime = newTime;
       setCurrentTime(newTime);
+    }
+  }
+
+  function rewind() {
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
+    }
+  }
+
+  // Function to handle forward
+  function forward() {
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.currentTime = Math.min(
+        videoElement.duration,
+        videoElement.currentTime + 10
+      );
     }
   }
 
@@ -63,8 +134,13 @@ function Project() {
         setDuration(videoElement.duration);
       };
 
+      const handleEnded = () => {
+        setIsPlaying(false);
+      };
+
       videoElement.addEventListener("timeupdate", handleTimeUpdate);
       videoElement.addEventListener("durationchange", handleDurationChange);
+      videoElement.addEventListener("ended", handleEnded);
 
       return () => {
         videoElement.removeEventListener("timeupdate", handleTimeUpdate);
@@ -72,23 +148,10 @@ function Project() {
           "durationchange",
           handleDurationChange
         );
+        videoElement.removeEventListener("ended", handleEnded);
       };
     }
   }, [videoSrc]);
-
-  const passedTimeStyle = {
-    width: `${(currentTime / duration) * 100}%`,
-    height: "10px",
-    background: "#5f4272", // Purple color for passed time
-    borderRadius: "inherit"
-  };
-  
-  const remainingTimeStyle = {
-    width: `${((duration - currentTime) / duration) * 100}%`,
-    height: "10px",
-    background: "#ecf0f1", // Gray color for remaining time
-    borderRadius: "inherit"
-  };
 
   return (
     <div className="main-div">
@@ -99,16 +162,12 @@ function Project() {
             <select
               className="layout form-select rounded-2 form-control"
               id="inputGroupSelect02"
+              value={format}
+              onChange={(e) => dispatch(setFormat(e.target.value))}
             >
-              <option value="1" selected>
-                <a className="rectangle"></a> 16:9
-              </option>
-              <option value="1">
-                <span className="rectanglevertical"></span> 9:16
-              </option>
-              <option value="1">
-                <i className="fa-solid fa-square"></i> 1:1
-              </option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="1:1">1:1</option>
             </select>
           </form>
         </div>
@@ -176,10 +235,10 @@ function Project() {
             ></i>{" "}
             03:00
           </a>
-          <a className="icon">
+          <a className="icon" onClick={rewind}>
             <i className="fa-solid fa-rotate-left"></i>
           </a>
-          <a className="icon">
+          <a className="icon" onClick={forward}>
             <i className="fa-solid fa-rotate-right"></i>
           </a>
           <a href="javascript:void(0)">
@@ -187,9 +246,16 @@ function Project() {
           </a>
         </div>
         {/* <img className="w-100" src="/assets/images/screen.png" alt="" /> */}
-        <video ref={videoRef} className="w-100">
-          {videoSrc && <source src={videoSrc} type="video/mp4" />}
-        </video>
+        <div>
+          <video
+            ref={videoRef}
+            // style={getAspectRatioStyles()}
+            onClick={handleVideoClick}
+            className="w-100"
+          >
+            {videoSrc && <source src={videoSrc} type="video/mp4" />}
+          </video>
+        </div>
       </div>
       <div className="duration-track">
         <button
@@ -204,24 +270,30 @@ function Project() {
           )}
         </button>
         <div className="line d-flex">
-          {/* <div className="dark"></div> */}
           <div className="custom-progress-bar w-100">
-          <div className="passed-time" style={passedTimeStyle} />
-          <div className="remaining-time" style={remainingTimeStyle} />
+            <Slider
+              value={currentTime}
+              max={duration}
+              onChange={handleProgressChange}
+            />
+          </div>
         </div>
-          {/* <input
-            className="w-100"
-            type="range"
-            min={0}
-            max={duration}
-            value={currentTime}
-            onChange={handleProgressChange}
-          /> */}
-        </div>
-        <i className="ms-1 bx bxs-volume-low"></i>
+
+        <button
+          onClick={toggleVolumeSlider}
+          className="border-0 volume-control-btn"
+        >
+          {showVolumeSlider && (
+            <Slider
+              value={volume * 100}
+              orientation="vertical"
+              onChange={handleVolumeChange}
+            />
+          )}
+          <i className="ms-1 bx bxs-volume-low"></i>
+        </button>
         <i className="ms-1 bx bx-layout"></i>
         <span>{`${formatTime(currentTime)} / ${formatTime(duration)}`}</span>
-        {/* <a href="javascript:void(0)">00:15:32/03:00:00</a> */}
       </div>
       <div className="timeline-div">
         {isTextOrThumbnail && <BlockLayers />}

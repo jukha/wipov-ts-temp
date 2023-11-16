@@ -864,7 +864,7 @@ footer .footer-bottom {
 
 .signup-page .alert-opt,
 .form-select {
-  color: red;
+  /* color: red; */
   font-family: "HurmeGeometricSans1regular";
   font-weight: 500;
   font-size: 12px;
@@ -1623,7 +1623,6 @@ select.layout .rectangle {
   }
 }
 /*Dashboard*/
-  
 
 /* Video player custom progress bar */
 /*********** Baseline, reset styles ***********/
@@ -1684,7 +1683,7 @@ input[type="range"]::-moz-range-thumb {
   width: 20px;
 }
 
-input[type="range"]:focus::-moz-range-thumb{
+input[type="range"]:focus::-moz-range-thumb {
   outline: 3px solid #000;
   outline-offset: 0.125rem;
 }
@@ -1692,3 +1691,33 @@ input[type="range"]:focus::-moz-range-thumb{
 .custom-progress-bar {
   border-radius: inherit;
 }
+
+.volume-control-btn {
+  position: relative;
+}
+.volume-control-btn .p-slider {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: lightgray;
+  width: 10px;
+  border-radius: 20px;
+}
+.volume-control-btn .p-slider .p-slider-range {
+  background: #5f4272;
+  border-radius: inherit;
+}
+
+.custom-progress-bar .p-slider {
+  background-color: #5f427228;
+  height: 100%;
+  border-radius: inherit;
+}
+.custom-progress-bar .p-slider .p-slider-range {
+  background: #5f4272;
+  border-radius: inherit;
+}
+/* ecf0f1
+  5f4272
+ */
